@@ -59,6 +59,26 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
+        case "map#queryRenderedFeatures":
+           guard let arguments = methodCall.arguments as? [String: Any] else { return }
+           
+            var features: [MGLFeature]?
+               
+            if let x = arguments["x"] as? Double,
+                   let y  = arguments["y"] as? Double {
+                   features = mapView.visibleFeatures(at: CGPoint(x: x, y: y))
+            } else if let left = arguments["left"] as? Double,
+                   let top = arguments["top"] as? Double,
+                   let right = arguments["right"] as? Double,
+                   let bottom = arguments["bottom"] as? Double {
+                   features = mapView.visibleFeatures(in: CGRect(x: left, y: top, width: right-left, height: bottom - left))
+             }
+             
+            if let features = features {
+                result(["features": features.map{feature in feature.attributes}])
+               } else {
+                   result(nil)
+                }
         case "camera#move":
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let cameraUpdate = arguments["cameraUpdate"] as? [Any] else { return }
